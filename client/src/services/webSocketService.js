@@ -314,5 +314,7 @@ class WebSocketService {
   }
 }
  
-const webSocketService = new WebSocketService();
+const webSocketService = new WebSocketService(
+  "https://ooa-testing-1.onrender.com"
+);
 export default webSocketService;
