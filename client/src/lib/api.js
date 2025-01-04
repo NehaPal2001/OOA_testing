@@ -1,2 +1,2 @@
-const api = "https://ooa-testing.onrender.com/api/v1";
+const api = "https://ooa-testing-1.onrender.com";
 export default api;
