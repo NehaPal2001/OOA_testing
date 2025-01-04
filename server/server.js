@@ -25,8 +25,7 @@ connectDB();
 app.use(helmet());
 const allowedOrigins = [
   "http://localhost:5173",
-  "http://sdett.oa.com:5173",
-  "https://eb8d-14-99-178-170.ngrok-free.app",
+  "https://ooa-testing-client.onrender.com",
 ];
 app.use(
   cors({
