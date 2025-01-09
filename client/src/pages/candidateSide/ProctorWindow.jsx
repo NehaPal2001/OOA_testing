@@ -472,10 +472,10 @@ const ProctorWindow = ({
     <div className="flex items-center justify-center bg-gray-100 p-4 min-h-[320px]">
       {renderProctorContent()}
 
-      <div className="absolute bottom-2 left-2 text-xs text-gray-500">
+      {/* <div className="absolute bottom-2 left-2 text-xs text-gray-500">
         Status: {proctorStatus}, Stream Active: {isStreamActive.toString()},
         Loading: {isVideoLoading.toString()}
-      </div>
+      </div> */}
     </div>
   );
 };
