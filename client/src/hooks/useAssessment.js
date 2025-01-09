@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getCandidateData, clearCandidateData } from "@/lib/auth-utils";
-import { createTestAttempt } from "@/services/testAttemptService";
 import { createAssessmentRoom } from "@/services/apiService";
 import api from "@/lib/api";
 
@@ -16,7 +15,6 @@ export const useAssessment = (assessmentId) => {
   const [isLoading, setIsLoading] = useState(true);
   const [responses, setResponses] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [testAttemptId, setTestAttemptId] = useState(null);
   const [startTime, setStartTime] = useState(null);
   const [roomDetails, setRoomDetails] = useState(null);
 
@@ -42,6 +40,10 @@ export const useAssessment = (assessmentId) => {
             id: option._id || "",
             text: option.text || "",
           })),
+          correctOption:
+            question.options.filter((option) => option.isCorrect == true)[0]
+              ?.text || "",
+          marks: question.marks || 1,
         })),
       };
 
@@ -57,7 +59,6 @@ export const useAssessment = (assessmentId) => {
       throw new Error(error.message || "Network error. Please try again.");
     }
   };
-
   const submitAssessment = async () => {
     try {
       setIsSubmitting(true);
@@ -65,26 +66,32 @@ export const useAssessment = (assessmentId) => {
       if (!candidateData) {
         throw new Error("No valid candidate found");
       }
-      if (!testAttemptId) {
-        throw new Error("No valid test found");
+      if (!startTime) {
+        throw new Error("Start time not recorded");
       }
 
       const validResponses = responses.filter((response) => response !== null);
+      console.log("Response: ", responses);
+      console.log("Valid Response: ", validResponses);
 
-      const response = await fetch(`${api}/testAttempt/create-attempt`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          candidateId: candidateData.candidateId,
-          assessmentId: assessmentId,
-          responses: validResponses,
-          endTime: new Date().toISOString(),
-        }),
-      });
+      const testAttemptResponse = await fetch(
+        `${api}/testAttempt/create-attempt`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            candidateId: candidateData.candidateId,
+            assessmentId: assessmentId,
+            responses: validResponses,
+            startTime: startTime,
+            endTime: new Date().toISOString(),
+          }),
+        }
+      );
 
-      if (!response.ok) {
+      if (!testAttemptResponse.ok) {
         throw new Error("Failed to submit assessment");
       }
 
@@ -138,15 +145,6 @@ export const useAssessment = (assessmentId) => {
         if (!storedCandidateData || !assessmentId) {
           throw new Error("No valid assessment session found");
         }
-
-        const testAttempt = await createTestAttempt({
-          candidateId: storedCandidateData,
-          assessmentId: assessmentId,
-          startTime: new Date().toISOString(),
-          responses: [],
-        });
-
-        setTestAttemptId(testAttempt.testAttempt._id);
         setStartTime(new Date().toISOString());
 
         const candidateInfo = {
